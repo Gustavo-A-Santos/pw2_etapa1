@@ -2,12 +2,11 @@
 const chalk = require('chalk')
 const inquirer = require('inquirer')
 //#endregion
-
 //#region Modulos Internos
 const fs = require('fs')
 //#endregion
 operation()
-//#region Operaões Iniciais
+//#region Operações Iniciais
 function operation(){
     inquirer.prompt([
         {
@@ -22,35 +21,31 @@ function operation(){
                 'Sair'
             ]
         }
-    ]).then((answer) => {
+    ]).then((answer) =>{
         const action = answer['action']
         if(action === 'Criar conta'){
             console.log('Criando sua conta')
             createAccount()
-        }
-        else if(action === 'Consultar saldo'){
+        }else if(action === 'Consultar Saldo'){
             console.log('Consultando saldo')
-        }
-        else if(action === 'Depositar'){
+        }else if(action === 'Depositar'){
             console.log('Depositando')
-        }
-        else if(action === 'Sacar'){
+        }else if(action === 'Sacar'){
             console.log('Sacando')
-        }
-        else if(action === 'sair'){
+        }else if(action === 'Sair'){
             console.log(chalk.bgBlue.black('Obrigado por utilizar o Contas ETEC.'))
             setTimeout(() => {
                 process.exit()
-            },1500);
+            }, 1500);
         }
     })
 }
 //#endregion
 
-// #region Criação de Contas
+//#region Criação de Contas
 function createAccount(){
-    console.log(chalk.bgGreen.black('Parabéns por escolher o Banco ETEC.'))
-    console.log(chalk.green('Defina as opções de conta:'))
+    console.log(chalk.bgGreen.black('Parabéns por escolher o Banco ETEC'))
+    console.log(chalk.green('Escolha as opções de conta:'))
 
     buildAccount()
 }
@@ -63,16 +58,16 @@ function buildAccount(){
     ]).then((answer) => {
         console.info(answer['accountName'])
         const accountName = answer['accountName']
-
         if(!fs.existsSync('accounts')){
             fs.mkdirSync('accounts')
         }
 
-        if(fs.existsSync(`account/${accountName}.json`)){
+        if(fs.existsSync(`accounts/${accountName}.json`)){
             console.log(
                 chalk.bgRed.black('Esta conta já existe!')
             )
             buildAccount(accountName)
+            return
         }
 
         fs.writeFileSync(
@@ -88,3 +83,41 @@ function buildAccount(){
     })
 }
 //#endregion
+
+//#region Depósito na Conta
+function deposit(){
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual conta deseja depositar?'
+        }
+    ]).then((answer) => {
+        const accountName = answer['accountName']
+
+        if(!checkAccount(accountName)){
+            return deposit()
+        }
+
+        inquirer.prompt([
+            {
+                name: 'amount',
+                message: 'Quanto deseja depositar?'
+            }
+        ]).then((answer) => {
+            const amount = answer['amount']
+
+            addAmount(accountName, amount)
+            setTimeout(() => {
+                operation()
+            },1000);
+        })
+    })
+}
+
+function checkAccount(accountName){
+    if(!fs.existsSync(`accounts/${accountName}.json`)){
+        return false
+    }
+    return true
+}
+//endregion
