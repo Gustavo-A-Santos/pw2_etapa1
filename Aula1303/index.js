@@ -30,6 +30,7 @@ function operation(){
             console.log('Consultando saldo')
         }else if(action === 'Depositar'){
             console.log('Depositando')
+            deposit()
         }else if(action === 'Sacar'){
             console.log('Sacando')
         }else if(action === 'Sair'){
@@ -105,8 +106,8 @@ function deposit(){
             }
         ]).then((answer) => {
             const amount = answer['amount']
-
             addAmount(accountName, amount)
+            console.log(chalk.bgYellow.green('Sucesso! Seu montante foi depositado.'))
             setTimeout(() => {
                 operation()
             },1000);
@@ -119,5 +120,34 @@ function checkAccount(accountName){
         return false
     }
     return true
+}
+
+function addAmount(accountName, amount){
+    const accountData = getAccount(accountName)
+
+    if(!amount){
+        console.log(chalk.bgRed.black("Erro de montante!"))
+        return deposit()
+    }
+
+    accountData.balance = parseFloat(amount)+parseFloat(accountData.balance)
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function (err){
+            console.log(err)
+        }
+    )
+    console.log(chalk.green('Seu valor foi depositado!'))
+}
+
+function getAccount(accountName){
+    const accountJSON = fs.readFileSync(`accounts/${accountName}.json`,
+    {
+        encoding: 'utf8',
+        flag: 'r'
+    })
+    return JSON.parse(accountJSON)
 }
 //endregion
